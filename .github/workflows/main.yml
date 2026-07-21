@@ -31,18 +31,30 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Generate Native Android Project
-        run: npx expo prebuild --platform android --no-install
-
-      - name: Build Android Debug APK
-        working-directory: android
-        run: ./gradlew assembleDebug
+      - name: Detect Package Location and Build APK
+        run: |
+          if [ -f "package.json" ]; then
+            echo "Building from root directory..."
+            npm install
+            npx expo prebuild --platform android --no-install
+            cd android
+            ./gradlew assembleDebug
+            echo "APK_PATH=android/app/build/outputs/apk/debug/app-debug.apk" >> $GITHUB_ENV
+          elif [ -f "mobile/package.json" ]; then
+            echo "Building from mobile/ directory..."
+            cd mobile
+            npm install
+            npx expo prebuild --platform android --no-install
+            cd android
+            ./gradlew assembleDebug
+            echo "APK_PATH=mobile/android/app/build/outputs/apk/debug/app-debug.apk" >> $GITHUB_ENV
+          else
+            echo "Error: package.json not found in root or mobile/!"
+            exit 1
+          fi
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: bhagavad-gita-android-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: ${{ env.APK_PATH }}
