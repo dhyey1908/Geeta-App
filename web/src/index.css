@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@theme {
+  /* Visual highlight color mappings (using Accent #F4A261 & contrast tones) */
+  --color-orange-100: #F1F5F9; /* Secondary/Muted background */
+  --color-orange-500: #F4A261; /* Primary Highlight (Accent #F4A261) */
+  --color-orange-600: #E76F51; /* Darker accent orange for high contrast text readability */
+  --color-orange-700: #D85D3C; /* Darker accent hover state */
+  --color-orange-800: #111827; /* Titles (Dark charcoal) */
+  --color-orange-850: #111827; /* Titles (Dark charcoal) */
+
+  /* Structural color mappings matching the user requested palette */
+  --color-stone-50: #FFFFFF;    /* Background (#FFFFFF) */
+  --color-white: #FAFAFA;       /* Card / Surface (#FAFAFA) */
+  --color-stone-100: #F8F9FA;   /* Primary (#F8F9FA) */
+  --color-stone-200: #E2E8F0;   /* Border (#E2E8F0) */
+  --color-stone-500: #6B7280;   /* Text Secondary (#6B7280) */
+  --color-stone-850: #111827;   /* Text (#111827) */
+  
+  --color-amber-500: #F4A261;   /* Accent (#F4A261) */
+  --color-amber-600: #F4A261;   /* Accent (#F4A261) */
+}
+
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  h1, h2, h3, h4, .font-serif-gita {
+    font-family: 'Cinzel', Georgia, serif;
+  }
+}
+
+/* Custom Scrollbar for a premium look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(244, 162, 97, 0.2);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(244, 162, 97, 0.4);
+}
+
+/* Glassmorphism utility card styling */
+.glass-panel {
+  background: rgba(250, 250, 250, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+/* Glow effects */
+.glow-saffron {
+  box-shadow: 0 0 20px rgba(244, 162, 97, 0.1);
+}
+
+.glow-gold {
+  box-shadow: 0 0 20px rgba(244, 162, 97, 0.15);
+}
+
+/* Sanskrit text styling */
+.sanskrit-text {
+  font-family: 'Cinzel', 'Yatra One', 'Noto Sans Devanagari', serif;
+  letter-spacing: 0.5px;
+  line-height: 1.8;
+}
+
+/* Custom layout resets */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
