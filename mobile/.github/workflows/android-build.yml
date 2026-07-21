@@ -1,6 +1,7 @@
 name: Android Build
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -31,7 +32,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm install
 
       - name: Generate Native Android Project
         run: npx expo prebuild --platform android --no-install
