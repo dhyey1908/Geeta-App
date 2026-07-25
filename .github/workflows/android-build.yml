@@ -37,21 +37,29 @@ jobs:
             echo "Building from root directory..."
             npm install
             npx expo prebuild --platform android --no-install
-            mkdir -p android/app/src/main/assets
-            npx react-native bundle --platform android --dev false --entry-file index.ts --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
             cd android
-            ./gradlew assembleDebug
-            echo "APK_PATH=android/app/build/outputs/apk/debug/app-debug.apk" >> $GITHUB_ENV
+            ./gradlew assembleRelease
+            if [ -f "app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
+              echo "Signing unsigned APK..."
+              keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+              APKSIGNER=$(find $ANDROID_HOME/build-tools -name apksigner | sort -r | head -n 1)
+              $APKSIGNER sign --ks debug.keystore --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/app-release-unsigned.apk
+            fi
+            echo "APK_PATH=android/app/build/outputs/apk/release/app-release.apk" >> $GITHUB_ENV
           elif [ -f "mobile/package.json" ]; then
             echo "Building from mobile/ directory..."
             cd mobile
             npm install
             npx expo prebuild --platform android --no-install
-            mkdir -p android/app/src/main/assets
-            npx react-native bundle --platform android --dev false --entry-file index.ts --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
             cd android
-            ./gradlew assembleDebug
-            echo "APK_PATH=mobile/android/app/build/outputs/apk/debug/app-debug.apk" >> $GITHUB_ENV
+            ./gradlew assembleRelease
+            if [ -f "app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
+              echo "Signing unsigned APK..."
+              keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+              APKSIGNER=$(find $ANDROID_HOME/build-tools -name apksigner | sort -r | head -n 1)
+              $APKSIGNER sign --ks debug.keystore --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/app-release-unsigned.apk
+            fi
+            echo "APK_PATH=mobile/android/app/build/outputs/apk/release/app-release.apk" >> $GITHUB_ENV
           else
             echo "Error: package.json not found in root or mobile/!"
             exit 1
@@ -60,6 +68,5 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: geeta-slok-android-apk
-          path: |
-            **/build/outputs/apk/**/*.apk
+          name: geeta-slok-release-apk
+          path: ${{ env.APK_PATH }}
