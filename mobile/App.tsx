@@ -582,30 +582,33 @@ function VerseDetailsScreen({ chapterNum, verseNum, navigateTo, navigateBack, co
   const [gujarati, setGujarati] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [loadingGu, setLoadingGu] = useState(false);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
 
   const scrollRef = useRef<ScrollView>(null);
   
   // Transition Animations
   const contentFade = useRef(new Animated.Value(0)).current;
-  const contentSlide = useRef(new Animated.Value(20)).current;
+  const contentSlide = useRef(new Animated.Value(0)).current;
   const translationsFade = useRef(new Animated.Value(0)).current;
 
   const totalVerses = slokCounts[chapterNum - 1];
 
   const triggerTransition = () => {
-    contentFade.setValue(0);
-    contentSlide.setValue(15);
+    // Determine starting X offset based on slide direction
+    const startX = slideDirection === 'right' ? 40 : -40;
+    contentSlide.setValue(startX);
+    contentFade.setValue(0.2);
     translationsFade.setValue(0);
     
     Animated.parallel([
       Animated.timing(contentFade, {
         toValue: 1,
-        duration: 350,
+        duration: 250,
         useNativeDriver: true,
       }),
       Animated.timing(contentSlide, {
         toValue: 0,
-        duration: 350,
+        duration: 250,
         useNativeDriver: true,
       })
     ]).start();
@@ -614,18 +617,25 @@ function VerseDetailsScreen({ chapterNum, verseNum, navigateTo, navigateBack, co
   useEffect(() => {
     async function load() {
       try {
-        setLoading(true);
-        triggerTransition();
-        
+        // Only show full skeleton loader on very first initial load (no verse present)
+        const isFirstLoad = !verse;
+        if (isFirstLoad) {
+          setLoading(true);
+        }
+
+        // Fetch verse details
         const data = await getVerseDetails(chapterNum, currentVerseNum);
         setVerse(data);
+        
+        // Trigger slide transition on data load
+        triggerTransition();
 
         // Reset scroll position on verse change
         if (scrollRef.current) {
           scrollRef.current.scrollTo({ y: 0, animated: false });
         }
 
-        // Translate dynamic Gujarati on the fly
+        // Fetch Gujarati translation
         const hindiText = data.rams?.ht || data.tej?.ht || '';
         if (hindiText) {
           setLoadingGu(true);
@@ -654,12 +664,14 @@ function VerseDetailsScreen({ chapterNum, verseNum, navigateTo, navigateBack, co
 
   const handleNext = () => {
     if (currentVerseNum < totalVerses) {
+      setSlideDirection('right');
       setCurrentVerseNum(prev => prev + 1);
     }
   };
 
   const handlePrev = () => {
     if (currentVerseNum > 1) {
+      setSlideDirection('left');
       setCurrentVerseNum(prev => prev - 1);
     }
   };
@@ -668,13 +680,13 @@ function VerseDetailsScreen({ chapterNum, verseNum, navigateTo, navigateBack, co
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (evt, gestureState) => {
-        // Intercept only when gesture is predominantly horizontal
-        return Math.abs(gestureState.dx) > 40 && Math.abs(gestureState.dy) < 20;
+        // High sensitivity horizontal gesture capture
+        return Math.abs(gestureState.dx) > 30 && Math.abs(gestureState.dy) < 18;
       },
       onPanResponderRelease: (evt, gestureState) => {
-        if (gestureState.dx < -50) {
+        if (gestureState.dx < -45) {
           handleNext();
-        } else if (gestureState.dx > 50) {
+        } else if (gestureState.dx > 45) {
           handlePrev();
         }
       },
@@ -708,25 +720,24 @@ function VerseDetailsScreen({ chapterNum, verseNum, navigateTo, navigateBack, co
             </View>
 
             {verse && (
-              <Animated.View style={{ opacity: contentFade, transform: [{ translateY: contentSlide }] }}>
+              <Animated.View style={{ opacity: contentFade, transform: [{ translateX: contentSlide }] }}>
                 {/* Shloka Box */}
                 <View style={[themeStyles.card, { padding: 22, alignItems: 'center', marginBottom: 24, borderLeftWidth: 4, borderLeftColor: colors.accent }]}>
                   <Text style={{ color: colors.textSecondary, fontSize: 11, fontWeight: 'bold', letterSpacing: 1, marginBottom: 8 }}>
                     VERSE {chapterNum}.{currentVerseNum}
                   </Text>
                   
-                  {/* Sanskrit Shloka: Optimized for readability, dark contrast */}
+                  {/* Sanskrit Shloka: Size 20, Accent color, centered, Georgia font as per before */}
                   <Text 
                     style={[
                       themeStyles.titleSerif, 
                       { 
-                        fontSize: 24, 
+                        fontSize: 20, 
                         textAlign: 'center', 
-                        lineHeight: 38, 
-                        letterSpacing: 0.5,
-                        marginVertical: 12, 
-                        color: "#05070A", // High contrast near-black
-                        fontWeight: '700' 
+                        lineHeight: 30, 
+                        marginVertical: 14, 
+                        color: colors.accent, 
+                        fontWeight: '600'
                       }
                     ]}
                   >
