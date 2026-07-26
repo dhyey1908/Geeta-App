@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   StyleSheet, Text, View, ScrollView, TouchableOpacity, 
-  ActivityIndicator, SafeAreaView, StatusBar, BackHandler, 
-  Platform
+  SafeAreaView, StatusBar, BackHandler, Platform, PanResponder, 
+  Animated
 } from 'react-native';
 import { 
   ArrowLeft, ArrowRight, Sparkles, ChevronRight
@@ -15,6 +15,148 @@ const slokCounts = [
   47, 72, 43, 42, 29, 47, 30, 28, 34, 42, 55, 20, 35, 27, 20, 24, 28, 78
 ];
 
+// ----------------------------------------------------
+// SKELETON PLACEHOLDER WIDGET
+// ----------------------------------------------------
+function SkeletonPlaceholder({ width, height, borderRadius = 8, style }: any) {
+  const opacity = useRef(new Animated.Value(0.4)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, {
+          toValue: 0.8,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 0.4,
+          duration: 800,
+          useNativeDriver: true,
+        })
+      ])
+    ).start();
+  }, []);
+
+  return (
+    <Animated.View 
+      style={[
+        {
+          width: width,
+          height: height,
+          borderRadius: borderRadius,
+          backgroundColor: '#E2E8F0', // light gray skeleton color
+          opacity: opacity,
+        },
+        style
+      ]}
+    />
+  );
+}
+
+// ----------------------------------------------------
+// PAGE SKELETON LOADERS
+// ----------------------------------------------------
+function HomeSkeleton({ colors }: any) {
+  return (
+    <ScrollView style={{ flex: 1, padding: 16 }} showsVerticalScrollIndicator={false}>
+      {/* Daily Quote Card Skeleton */}
+      <View style={{ backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: 16, padding: 16, marginBottom: 24 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 }}>
+          <SkeletonPlaceholder width={100} height={16} />
+          <SkeletonPlaceholder width={80} height={16} />
+        </View>
+        <SkeletonPlaceholder width="90%" height={20} style={{ alignSelf: 'center', marginBottom: 8 }} />
+        <SkeletonPlaceholder width="75%" height={20} style={{ alignSelf: 'center', marginBottom: 16 }} />
+        <View style={{ borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 12, flexDirection: 'row', justifyContent: 'space-between' }}>
+          <SkeletonPlaceholder width="60%" height={14} />
+          <SkeletonPlaceholder width={70} height={14} />
+        </View>
+      </View>
+
+      {/* Title Skeleton */}
+      <SkeletonPlaceholder width={150} height={20} style={{ marginBottom: 16 }} />
+
+      {/* Chapters list skeleton (3 items) */}
+      {[1, 2, 3].map((i) => (
+        <View key={i} style={{ backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: 16, padding: 16, marginBottom: 12 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+            <SkeletonPlaceholder width={60} height={16} />
+            <SkeletonPlaceholder width={40} height={16} />
+          </View>
+          <SkeletonPlaceholder width={140} height={18} style={{ marginBottom: 8 }} />
+          <SkeletonPlaceholder width={100} height={14} style={{ marginBottom: 12 }} />
+          <SkeletonPlaceholder width="95%" height={14} style={{ marginBottom: 6 }} />
+          <SkeletonPlaceholder width="80%" height={14} />
+        </View>
+      ))}
+    </ScrollView>
+  );
+}
+
+function ChapterSkeleton({ colors }: any) {
+  return (
+    <ScrollView style={{ flex: 1, padding: 16 }} showsVerticalScrollIndicator={false}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+        <SkeletonPlaceholder width={100} height={16} />
+      </View>
+      
+      <View style={{ backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: 16, padding: 20, marginBottom: 20 }}>
+        <SkeletonPlaceholder width={70} height={12} style={{ marginBottom: 8 }} />
+        <SkeletonPlaceholder width={200} height={24} style={{ marginBottom: 8 }} />
+        <SkeletonPlaceholder width={120} height={14} style={{ marginBottom: 12 }} />
+        <SkeletonPlaceholder width="100%" height={14} style={{ marginBottom: 6 }} />
+        <SkeletonPlaceholder width="95%" height={14} style={{ marginBottom: 6 }} />
+        <SkeletonPlaceholder width="80%" height={14} />
+      </View>
+
+      <SkeletonPlaceholder width={180} height={18} style={{ marginBottom: 16 }} />
+
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+        {Array.from({ length: 16 }).map((_, index) => (
+          <View key={index} style={{ width: '23%', marginBottom: 10 }}>
+            <SkeletonPlaceholder width="100%" height={48} borderRadius={16} />
+          </View>
+        ))}
+      </View>
+    </ScrollView>
+  );
+}
+
+function VerseSkeleton({ colors }: any) {
+  return (
+    <ScrollView style={{ flex: 1, padding: 16 }} showsVerticalScrollIndicator={false}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <SkeletonPlaceholder width={90} height={16} />
+        <SkeletonPlaceholder width={110} height={16} />
+      </View>
+
+      {/* Shloka Card Skeleton */}
+      <View style={{ backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: 16, padding: 20, alignItems: 'center', marginBottom: 24 }}>
+        <SkeletonPlaceholder width={80} height={12} style={{ marginBottom: 16 }} />
+        <SkeletonPlaceholder width="85%" height={22} style={{ marginBottom: 8 }} />
+        <SkeletonPlaceholder width="90%" height={22} style={{ marginBottom: 8 }} />
+        <SkeletonPlaceholder width="65%" height={22} style={{ marginBottom: 20 }} />
+        <SkeletonPlaceholder width="100%" height={14} style={{ borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 14 }} />
+      </View>
+
+      <SkeletonPlaceholder width={100} height={18} style={{ marginBottom: 14 }} />
+
+      {/* 3 Translation Cards */}
+      {[1, 2, 3].map((i) => (
+        <View key={i} style={{ backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: 16, padding: 16, marginBottom: 16 }}>
+          <SkeletonPlaceholder width={140} height={12} style={{ marginBottom: 10 }} />
+          <SkeletonPlaceholder width="95%" height={14} style={{ marginBottom: 6 }} />
+          <SkeletonPlaceholder width="80%" height={14} />
+        </View>
+      ))}
+    </ScrollView>
+  );
+}
+
+// ----------------------------------------------------
+// MAIN APP COMPONENT
+// ----------------------------------------------------
 export default function App() {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +190,7 @@ export default function App() {
     return () => subscription.remove();
   }, [screenHistory, currentScreen]);
 
-  // Load Initial Theme & Gita Data
+  // Load Gita Data and enforce light theme
   useEffect(() => {
     async function init() {
       try {
@@ -73,13 +215,13 @@ export default function App() {
     primary: "#F8F9FA",
     primaryDark: "#E2E8F0",
     secondary: "#F1F5F9",
-    accent: "#F4A261",
-    background: isDark ? '#111827' : '#FFFFFF',
-    surface: isDark ? '#1f2937' : '#FAFAFA',
-    muted: isDark ? '#1f2937' : '#F1F5F9',
-    text: isDark ? '#F3F4F6' : '#111827',
-    textSecondary: isDark ? '#9CA3AF' : '#6B7280',
-    border: isDark ? '#374151' : '#E2E8F0',
+    accent: "#F4A261", // Saffron / Gold
+    background: "#FFFFFF",
+    surface: "#FAFAFA",
+    muted: "#F1F5F9",
+    text: "#111827", // Near black text
+    textSecondary: "#6B7280",
+    border: "#E2E8F0",
   };
 
   const themeStyles = StyleSheet.create({
@@ -95,50 +237,27 @@ export default function App() {
       padding: 16,
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: isDark ? 0.3 : 0.05,
+      shadowOpacity: 0.05,
       shadowRadius: 4,
       elevation: 2,
     },
     text: {
       color: colors.text,
       fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
-      fontSize: 14,
+      fontSize: 15,
+      lineHeight: 22,
     },
     header: {
       color: colors.text,
       fontWeight: 'bold',
-      fontSize: 16,
+      fontSize: 17,
     },
     titleSerif: {
-      color: isDark ? colors.accent : colors.text,
+      color: colors.text,
       fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
       fontWeight: '600',
     }
   });
-
-  if (loading) {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background }}>
-        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
-        <ActivityIndicator size="large" color={colors.accent} />
-        <Text style={[themeStyles.text, { marginTop: 12, fontSize: 16, fontWeight: 'bold' }]}>
-          Loading Shrimad Bhagavad Gita...
-        </Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, backgroundColor: colors.background }}>
-        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
-        <View style={[themeStyles.card, { alignItems: 'center', padding: 24 }]}>
-          <Text style={[themeStyles.header, { fontSize: 20, marginVertical: 12 }]}>Connection Offline</Text>
-          <Text style={[themeStyles.text, { textAlign: 'center', marginBottom: 20 }]}>{error}</Text>
-        </View>
-      </View>
-    );
-  }
 
   const renderScreen = () => {
     switch (currentScreen.name) {
@@ -149,7 +268,6 @@ export default function App() {
             navigateTo={navigateTo} 
             colors={colors}
             themeStyles={themeStyles}
-            isDark={isDark}
           />
         );
       case 'ChapterDetails':
@@ -160,7 +278,6 @@ export default function App() {
             navigateBack={navigateBack}
             colors={colors}
             themeStyles={themeStyles}
-            isDark={isDark}
           />
         );
       case 'VerseDetails':
@@ -172,7 +289,6 @@ export default function App() {
             navigateBack={navigateBack}
             colors={colors}
             themeStyles={themeStyles}
-            isDark={isDark}
           />
         );
       default:
@@ -182,33 +298,62 @@ export default function App() {
 
   return (
     <SafeAreaView style={themeStyles.container}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.surface} />
       
       {/* Header Bar */}
       <View 
         style={{ 
-          height: 60, 
+          paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 12 : 16,
+          paddingBottom: 16,
           flexDirection: 'row', 
           alignItems: 'center', 
           justifyContent: 'space-between',
           paddingHorizontal: 16,
           backgroundColor: colors.surface,
           borderBottomWidth: 1,
-          borderBottomColor: colors.border
+          borderBottomColor: colors.border,
+          zIndex: 10,
         }}
       >
-        <TouchableOpacity onPress={() => { setScreenHistory([]); setCurrentScreen({ name: 'Home' }); }} style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center', marginRight: 8 }}>
-            <Text style={{ color: '#fff', fontSize: 14, fontWeight: 'bold' }}>ॐ</Text>
+        <TouchableOpacity 
+          onPress={() => { setScreenHistory([]); setCurrentScreen({ name: 'Home' }); }} 
+          style={{ flexDirection: 'row', alignItems: 'center', minHeight: 48 }}
+        >
+          <View 
+            style={{ 
+              width: 36, 
+              height: 36, 
+              borderRadius: 18, 
+              backgroundColor: colors.accent, 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              marginRight: 10,
+              borderWidth: 1,
+              borderColor: '#FFFFFF',
+            }}
+          >
+            <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: 'bold' }}>ॐ</Text>
           </View>
-          <Text style={[themeStyles.titleSerif, { fontSize: 18, fontWeight: 'bold' }]}>શ્રીમદ્ ભગવદ્ ગીતા</Text>
+          <Text style={[themeStyles.titleSerif, { fontSize: 20, fontWeight: 'bold' }]}>Geeta Slok</Text>
         </TouchableOpacity>
-
-        <View />
+        
+        {/* Placeholder to balance row layout alignment */}
+        <View style={{ width: 36 }} />
       </View>
 
       <View style={{ flex: 1 }}>
-        {renderScreen()}
+        {loading ? (
+          <HomeSkeleton colors={colors} />
+        ) : error ? (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, backgroundColor: colors.background }}>
+            <View style={[themeStyles.card, { alignItems: 'center', padding: 24 }]}>
+              <Text style={[themeStyles.header, { fontSize: 20, marginVertical: 12 }]}>Connection Offline</Text>
+              <Text style={[themeStyles.text, { textAlign: 'center', marginBottom: 20 }]}>{error}</Text>
+            </View>
+          </View>
+        ) : (
+          renderScreen()
+        )}
       </View>
     </SafeAreaView>
   );
@@ -217,9 +362,12 @@ export default function App() {
 // ----------------------------------------------------
 // 1. HOME SCREEN
 // ----------------------------------------------------
-function HomeScreen({ chapters, navigateTo, colors, themeStyles, isDark }: any) {
+function HomeScreen({ chapters, navigateTo, colors, themeStyles }: any) {
   const [daily, setDaily] = useState<Verse | null>(null);
   const [loadingDaily, setLoadingDaily] = useState(true);
+  
+  // Animations
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     async function loadDaily() {
@@ -227,6 +375,13 @@ function HomeScreen({ chapters, navigateTo, colors, themeStyles, isDark }: any) 
         setLoadingDaily(true);
         const verse = await getRandomVerse();
         setDaily(verse);
+        
+        // Trigger fade animation
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }).start();
       } catch (err) {
         console.error(err);
       } finally {
@@ -239,7 +394,7 @@ function HomeScreen({ chapters, navigateTo, colors, themeStyles, isDark }: any) 
   return (
     <ScrollView style={{ flex: 1, padding: 16 }} showsVerticalScrollIndicator={false}>
       {/* Daily Quote */}
-      <View style={[themeStyles.card, { marginBottom: 24, borderColor: colors.accent + '30', borderStyle: 'solid' }]}>
+      <View style={[themeStyles.card, { marginBottom: 24, borderColor: colors.accent + '40' }]}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomColor: colors.border, borderBottomWidth: 1, paddingBottom: 8, marginBottom: 10 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Sparkles size={16} color={colors.accent} style={{ marginRight: 6 }} />
@@ -253,28 +408,32 @@ function HomeScreen({ chapters, navigateTo, colors, themeStyles, isDark }: any) 
         </View>
 
         {loadingDaily ? (
-          <ActivityIndicator size="small" color={colors.accent} style={{ marginVertical: 20 }} />
+          <View style={{ paddingVertical: 10 }}>
+            <SkeletonPlaceholder width="85%" height={18} style={{ alignSelf: 'center', marginBottom: 8 }} />
+            <SkeletonPlaceholder width="60%" height={18} style={{ alignSelf: 'center', marginBottom: 16 }} />
+            <SkeletonPlaceholder width="100%" height={14} style={{ borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 10, marginTop: 10 }} />
+          </View>
         ) : daily ? (
-          <View>
+          <Animated.View style={{ opacity: fadeAnim }}>
             <Text 
               style={[
                 themeStyles.titleSerif, 
-                { fontSize: 18, textAlign: 'center', lineHeight: 28, marginVertical: 8, color: colors.accent }
+                { fontSize: 18, textAlign: 'center', lineHeight: 28, marginVertical: 8, color: colors.text, fontWeight: 'bold' }
               ]}
             >
               {daily.slok}
             </Text>
-            <Text style={[themeStyles.text, { fontSize: 13, lineHeight: 18, borderTopColor: colors.border, borderTopWidth: 1, paddingTop: 10 }]}>
+            <Text style={[themeStyles.text, { fontSize: 13, lineHeight: 18, borderTopColor: colors.border, borderTopWidth: 1, paddingTop: 10, color: colors.textSecondary }]}>
               {daily.rams?.ht || daily.tej?.ht || 'No translation available.'}
             </Text>
             <TouchableOpacity 
               onPress={() => navigateTo('VerseDetails', { chapterNumber: daily.chapter, verseNumber: daily.verse })}
-              style={{ marginTop: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}
+              style={{ marginTop: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', minHeight: 48, minWidth: 48 }}
             >
               <Text style={{ color: colors.accent, fontWeight: 'bold', fontSize: 13 }}>Study Shloka </Text>
               <ChevronRight size={14} color={colors.accent} />
             </TouchableOpacity>
-          </View>
+          </Animated.View>
         ) : (
           <Text style={themeStyles.text}>Could not load daily verse.</Text>
         )}
@@ -288,7 +447,7 @@ function HomeScreen({ chapters, navigateTo, colors, themeStyles, isDark }: any) 
         <TouchableOpacity
           key={ch.chapter_number}
           onPress={() => navigateTo('ChapterDetails', { chapterNumber: ch.chapter_number })}
-          style={[themeStyles.card, { marginBottom: 12 }]}
+          style={[themeStyles.card, { marginBottom: 12, minHeight: 48 }]}
         >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -312,9 +471,13 @@ function HomeScreen({ chapters, navigateTo, colors, themeStyles, isDark }: any) 
 // ----------------------------------------------------
 // 2. CHAPTER DETAILS SCREEN
 // ----------------------------------------------------
-function ChapterDetailsScreen({ chapterNum, navigateTo, navigateBack, colors, themeStyles, isDark }: any) {
+function ChapterDetailsScreen({ chapterNum, navigateTo, navigateBack, colors, themeStyles }: any) {
   const [chapter, setChapter] = useState<Chapter | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Animations
+  const screenFade = useRef(new Animated.Value(0)).current;
+  const screenSlide = useRef(new Animated.Value(15)).current;
 
   useEffect(() => {
     async function load() {
@@ -322,6 +485,20 @@ function ChapterDetailsScreen({ chapterNum, navigateTo, navigateBack, colors, th
         setLoading(true);
         const data = await getChapterDetails(chapterNum);
         setChapter(data);
+        
+        // Trigger animations
+        Animated.parallel([
+          Animated.timing(screenFade, {
+            toValue: 1,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+          Animated.timing(screenSlide, {
+            toValue: 0,
+            duration: 400,
+            useNativeDriver: true,
+          })
+        ]).start();
       } catch (err) {
         console.error(err);
       } finally {
@@ -332,11 +509,7 @@ function ChapterDetailsScreen({ chapterNum, navigateTo, navigateBack, colors, th
   }, [chapterNum]);
 
   if (loading) {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator size="small" color={colors.accent} />
-      </View>
-    );
+    return <ChapterSkeleton colors={colors} />;
   }
 
   if (!chapter) {
@@ -344,82 +517,131 @@ function ChapterDetailsScreen({ chapterNum, navigateTo, navigateBack, colors, th
   }
 
   return (
-    <ScrollView style={{ flex: 1, padding: 16 }} showsVerticalScrollIndicator={false}>
-      <TouchableOpacity onPress={navigateBack} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
-        <ArrowLeft size={16} color={colors.accent} style={{ marginRight: 6 }} />
-        <Text style={{ color: colors.accent, fontWeight: 'bold' }}>All Chapters</Text>
-      </TouchableOpacity>
+    <Animated.View style={{ flex: 1, opacity: screenFade, transform: [{ translateY: screenSlide }] }}>
+      <ScrollView style={{ flex: 1, padding: 16 }} showsVerticalScrollIndicator={false}>
+        <TouchableOpacity 
+          onPress={navigateBack} 
+          style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, minHeight: 48 }}
+        >
+          <ArrowLeft size={16} color={colors.accent} style={{ marginRight: 6 }} />
+          <Text style={{ color: colors.accent, fontWeight: 'bold' }}>All Chapters</Text>
+        </TouchableOpacity>
 
-      <View style={[themeStyles.card, { padding: 20, marginBottom: 20 }]}>
-        <Text style={{ color: colors.accent, fontSize: 11, fontWeight: 'bold', textTransform: 'uppercase' }}>Chapter {chapter.chapter_number}</Text>
-        <Text style={[themeStyles.header, { fontSize: 22, marginVertical: 4 }]}>{chapter.name}</Text>
-        <Text style={[themeStyles.text, { fontSize: 12, color: colors.accent, fontStyle: 'italic', marginBottom: 8 }]}>{chapter.transliteration}</Text>
-        <Text style={[themeStyles.header, { fontSize: 14, marginBottom: 12 }]}>{chapter.meaning.en} • {chapter.meaning.hi}</Text>
-        <Text style={[themeStyles.text, { fontSize: 13, lineHeight: 18, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 10, color: colors.textSecondary }]}>
-          {chapter.summary.en}
-        </Text>
-      </View>
+        <View style={[themeStyles.card, { padding: 20, marginBottom: 20 }]}>
+          <Text style={{ color: colors.accent, fontSize: 11, fontWeight: 'bold', textTransform: 'uppercase' }}>Chapter {chapter.chapter_number}</Text>
+          <Text style={[themeStyles.header, { fontSize: 22, marginVertical: 4 }]}>{chapter.name}</Text>
+          <Text style={[themeStyles.text, { fontSize: 12, color: colors.accent, fontStyle: 'italic', marginBottom: 8 }]}>{chapter.transliteration}</Text>
+          <Text style={[themeStyles.header, { fontSize: 14, marginBottom: 12 }]}>{chapter.meaning.en} • {chapter.meaning.hi}</Text>
+          <Text style={[themeStyles.text, { fontSize: 13, lineHeight: 18, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 10, color: colors.textSecondary }]}>
+            {chapter.summary.en}
+          </Text>
+        </View>
 
-      <View style={{ borderBottomColor: colors.border, borderBottomWidth: 1, paddingBottom: 8, marginBottom: 12 }}>
-        <Text style={[themeStyles.header, { fontSize: 16 }]}>Select Verse ({chapter.verses_count} Verses)</Text>
-      </View>
+        <View style={{ borderBottomColor: colors.border, borderBottomWidth: 1, paddingBottom: 8, marginBottom: 12 }}>
+          <Text style={[themeStyles.header, { fontSize: 16 }]}>Select Verse ({chapter.verses_count} Verses)</Text>
+        </View>
 
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-        {Array.from({ length: chapter.verses_count }, (_, index) => {
-          const verseNum = index + 1;
-          return (
-            <TouchableOpacity
-              key={verseNum}
-              onPress={() => navigateTo('VerseDetails', { chapterNumber: chapterNum, verseNumber: verseNum })}
-              style={[
-                themeStyles.card, 
-                { 
-                  width: '23%', 
-                  marginBottom: 10, 
-                  alignItems: 'center',
-                  paddingVertical: 12,
-                }
-              ]}
-            >
-              <Text style={{ color: colors.accent, fontWeight: 'bold', fontSize: 14 }}>
-                {verseNum}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-      <View style={{ height: 32 }} />
-    </ScrollView>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+          {Array.from({ length: chapter.verses_count }, (_, index) => {
+            const verseNum = index + 1;
+            return (
+              <TouchableOpacity
+                key={verseNum}
+                onPress={() => navigateTo('VerseDetails', { chapterNumber: chapterNum, verseNumber: verseNum })}
+                style={[
+                  themeStyles.card, 
+                  { 
+                    width: '23%', 
+                    marginBottom: 10, 
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    paddingVertical: 12,
+                    minHeight: 48,
+                  }
+                ]}
+              >
+                <Text style={{ color: colors.accent, fontWeight: 'bold', fontSize: 14 }}>
+                  {verseNum}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+        <View style={{ height: 32 }} />
+      </ScrollView>
+    </Animated.View>
   );
 }
 
 // ----------------------------------------------------
 // 3. VERSE DETAILS SCREEN
 // ----------------------------------------------------
-function VerseDetailsScreen({ chapterNum, verseNum, navigateTo, navigateBack, colors, themeStyles, isDark }: any) {
+function VerseDetailsScreen({ chapterNum, verseNum, navigateTo, navigateBack, colors, themeStyles }: any) {
+  const [currentVerseNum, setCurrentVerseNum] = useState<number>(verseNum);
   const [verse, setVerse] = useState<Verse | null>(null);
   const [gujarati, setGujarati] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [loadingGu, setLoadingGu] = useState(false);
 
+  const scrollRef = useRef<ScrollView>(null);
+  
+  // Transition Animations
+  const contentFade = useRef(new Animated.Value(0)).current;
+  const contentSlide = useRef(new Animated.Value(20)).current;
+  const translationsFade = useRef(new Animated.Value(0)).current;
+
   const totalVerses = slokCounts[chapterNum - 1];
+
+  const triggerTransition = () => {
+    contentFade.setValue(0);
+    contentSlide.setValue(15);
+    translationsFade.setValue(0);
+    
+    Animated.parallel([
+      Animated.timing(contentFade, {
+        toValue: 1,
+        duration: 350,
+        useNativeDriver: true,
+      }),
+      Animated.timing(contentSlide, {
+        toValue: 0,
+        duration: 350,
+        useNativeDriver: true,
+      })
+    ]).start();
+  };
 
   useEffect(() => {
     async function load() {
       try {
         setLoading(true);
-        const data = await getVerseDetails(chapterNum, verseNum);
+        triggerTransition();
+        
+        const data = await getVerseDetails(chapterNum, currentVerseNum);
         setVerse(data);
+
+        // Reset scroll position on verse change
+        if (scrollRef.current) {
+          scrollRef.current.scrollTo({ y: 0, animated: false });
+        }
 
         // Translate dynamic Gujarati on the fly
         const hindiText = data.rams?.ht || data.tej?.ht || '';
         if (hindiText) {
           setLoadingGu(true);
-          const guTranslation = await getGujaratiTranslation(chapterNum, verseNum, hindiText);
+          const guTranslation = await getGujaratiTranslation(chapterNum, currentVerseNum, hindiText);
           setGujarati(guTranslation);
+          
+          // Animate translation entry
+          Animated.timing(translationsFade, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          }).start();
           setLoadingGu(false);
         } else {
           setGujarati('અનુવાદ ઉપલબ્ધ નથી.');
+          translationsFade.setValue(1);
         }
       } catch (err) {
         console.error(err);
@@ -428,108 +650,218 @@ function VerseDetailsScreen({ chapterNum, verseNum, navigateTo, navigateBack, co
       }
     }
     load();
-  }, [chapterNum, verseNum]);
+  }, [chapterNum, currentVerseNum]);
 
-  if (loading && !verse) {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator size="small" color={colors.accent} />
-      </View>
-    );
-  }
+  const handleNext = () => {
+    if (currentVerseNum < totalVerses) {
+      setCurrentVerseNum(prev => prev + 1);
+    }
+  };
 
-  if (!verse) {
-    return <Text style={themeStyles.text}>Verse not found</Text>;
-  }
+  const handlePrev = () => {
+    if (currentVerseNum > 1) {
+      setCurrentVerseNum(prev => prev - 1);
+    }
+  };
+
+  // Swipe Navigation (PanResponder setup)
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        // Intercept only when gesture is predominantly horizontal
+        return Math.abs(gestureState.dx) > 40 && Math.abs(gestureState.dy) < 20;
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        if (gestureState.dx < -50) {
+          handleNext();
+        } else if (gestureState.dx > 50) {
+          handlePrev();
+        }
+      },
+    })
+  ).current;
 
   return (
-    <ScrollView style={{ flex: 1, padding: 16 }} showsVerticalScrollIndicator={false}>
-      {/* Toolbar */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <TouchableOpacity onPress={navigateBack} style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <ArrowLeft size={16} color={colors.accent} style={{ marginRight: 6 }} />
-          <Text style={{ color: colors.accent, fontWeight: 'bold' }}>Chapter {chapterNum}</Text>
-        </TouchableOpacity>
-        <Text style={{ color: colors.accent, fontWeight: 'bold', fontSize: 13 }}>
-          Verse {verseNum} of {totalVerses}
-        </Text>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      {/* Scrollable Container with Pan Handlers */}
+      <View {...panResponder.panHandlers} style={{ flex: 1 }}>
+        {loading && !verse ? (
+          <VerseSkeleton colors={colors} />
+        ) : (
+          <ScrollView 
+            ref={scrollRef} 
+            style={{ flex: 1, padding: 16 }} 
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Back Navigation Bar */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <TouchableOpacity 
+                onPress={navigateBack} 
+                style={{ flexDirection: 'row', alignItems: 'center', minHeight: 48 }}
+              >
+                <ArrowLeft size={16} color={colors.accent} style={{ marginRight: 6 }} />
+                <Text style={{ color: colors.accent, fontWeight: 'bold' }}>Chapter {chapterNum}</Text>
+              </TouchableOpacity>
+              <Text style={{ color: colors.textSecondary, fontWeight: 'bold', fontSize: 13 }}>
+                Verse {currentVerseNum} of {totalVerses}
+              </Text>
+            </View>
+
+            {verse && (
+              <Animated.View style={{ opacity: contentFade, transform: [{ translateY: contentSlide }] }}>
+                {/* Shloka Box */}
+                <View style={[themeStyles.card, { padding: 22, alignItems: 'center', marginBottom: 24, borderLeftWidth: 4, borderLeftColor: colors.accent }]}>
+                  <Text style={{ color: colors.textSecondary, fontSize: 11, fontWeight: 'bold', letterSpacing: 1, marginBottom: 8 }}>
+                    VERSE {chapterNum}.{currentVerseNum}
+                  </Text>
+                  
+                  {/* Sanskrit Shloka: Optimized for readability, dark contrast */}
+                  <Text 
+                    style={[
+                      themeStyles.titleSerif, 
+                      { 
+                        fontSize: 24, 
+                        textAlign: 'center', 
+                        lineHeight: 38, 
+                        letterSpacing: 0.5,
+                        marginVertical: 12, 
+                        color: "#05070A", // High contrast near-black
+                        fontWeight: '700' 
+                      }
+                    ]}
+                  >
+                    {verse.slok}
+                  </Text>
+                  
+                  {/* Roman Transliteration */}
+                  <Text 
+                    style={[
+                      themeStyles.text, 
+                      { 
+                        fontSize: 13, 
+                        textAlign: 'center', 
+                        fontStyle: 'italic', 
+                        borderTopColor: colors.border, 
+                        borderTopWidth: 1, 
+                        paddingTop: 14, 
+                        marginTop: 6,
+                        color: colors.textSecondary, 
+                        width: '100%',
+                        lineHeight: 20
+                      }
+                    ]}
+                  >
+                    {verse.transliteration}
+                  </Text>
+                </View>
+
+                {/* Translations List */}
+                <View style={{ marginBottom: 40 }}>
+                  <Text style={[themeStyles.header, { fontSize: 16, marginBottom: 14, fontWeight: 'bold', color: colors.text }]}>Translations</Text>
+
+                  {/* Hindi (Gitapress) */}
+                  <View style={[themeStyles.card, { marginBottom: 16 }]}>
+                    <Text style={{ fontSize: 10, color: colors.accent, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>
+                      Hindi (Gita Press / स्वामी रामसुखदास)
+                    </Text>
+                    <Text style={[themeStyles.text, { fontSize: 14, lineHeight: 22, color: colors.text }]}>
+                      {verse.rams?.ht || 'अनुवाद उपलब्ध नहीं है।'}
+                    </Text>
+                  </View>
+
+                  {/* Gujarati */}
+                  <View style={[themeStyles.card, { marginBottom: 16 }]}>
+                    <Text style={{ fontSize: 10, color: colors.accent, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>
+                      Gujarati (ગુજરાતી અનુવાદ)
+                    </Text>
+                    {loadingGu ? (
+                      <View style={{ paddingVertical: 4 }}>
+                        <SkeletonPlaceholder width="95%" height={14} style={{ marginBottom: 6 }} />
+                        <SkeletonPlaceholder width="70%" height={14} />
+                      </View>
+                    ) : (
+                      <Animated.View style={{ opacity: translationsFade }}>
+                        <Text style={[themeStyles.text, { fontSize: 14, lineHeight: 22, color: colors.text }]}>
+                          {gujarati}
+                        </Text>
+                      </Animated.View>
+                    )}
+                  </View>
+
+                  {/* English */}
+                  <View style={[themeStyles.card, { marginBottom: 16 }]}>
+                    <Text style={{ fontSize: 10, color: colors.accent, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>
+                      English (Swami Sivananda)
+                    </Text>
+                    <Text style={[themeStyles.text, { fontSize: 14, lineHeight: 22, color: colors.text }]}>
+                      {verse.siva?.et || verse.prabhu?.et || 'Translation not available.'}
+                    </Text>
+                  </View>
+                </View>
+              </Animated.View>
+            )}
+          </ScrollView>
+        )}
       </View>
 
-      {/* Shloka Box */}
-      <View style={[themeStyles.card, { padding: 20, alignItems: 'center', marginBottom: 20 }]}>
-        <Text style={{ color: colors.accent, fontSize: 11, fontWeight: 'bold' }}>VERSE {chapterNum}.{verseNum}</Text>
-        <Text 
-          style={[
-            themeStyles.titleSerif, 
-            { fontSize: 20, textAlign: 'center', lineHeight: 30, marginVertical: 14, color: colors.accent }
-          ]}
-        >
-          {verse.slok}
-        </Text>
-        <Text style={[themeStyles.text, { fontSize: 12, textAlign: 'center', fontStyle: 'italic', borderTopColor: colors.border, borderTopWidth: 1, paddingTop: 10, color: colors.textSecondary, width: '100%' }]}>
-          {verse.transliteration}
-        </Text>
-      </View>
-
-      {/* Translations List */}
-      <View>
-        <Text style={[themeStyles.header, { fontSize: 16, marginBottom: 10, fontWeight: 'bold' }]}>Translations</Text>
-
-        {/* Hindi (Gitapress) */}
-        <View style={[themeStyles.card, { marginBottom: 12 }]}>
-          <Text style={{ fontSize: 10, color: colors.accent, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
-            Hindi (Gita Press / स्वामी रामसुखदास)
-          </Text>
-          <Text style={[themeStyles.text, { fontSize: 14, lineHeight: 20 }]}>
-            {verse.rams?.ht || 'अनुवाद उपलब्ध नहीं है।'}
-          </Text>
-        </View>
-
-        {/* Gujarati */}
-        <View style={[themeStyles.card, { marginBottom: 12 }]}>
-          <Text style={{ fontSize: 10, color: colors.accent, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
-            Gujarati (ગુજરાતી અનુવાદ)
-          </Text>
-          {loadingGu ? (
-            <ActivityIndicator size="small" color={colors.accent} style={{ alignSelf: 'flex-start', marginVertical: 4 }} />
-          ) : (
-            <Text style={[themeStyles.text, { fontSize: 14, lineHeight: 20 }]}>
-              {gujarati}
-            </Text>
-          )}
-        </View>
-
-        {/* English */}
-        <View style={[themeStyles.card, { marginBottom: 12 }]}>
-          <Text style={{ fontSize: 10, color: colors.accent, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
-            English (Swami Sivananda)
-          </Text>
-          <Text style={[themeStyles.text, { fontSize: 14, lineHeight: 20 }]}>
-            {verse.siva?.et || verse.prabhu?.et || 'Translation not available.'}
-          </Text>
-        </View>
-      </View>
-
-      {/* Prev / Next buttons */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 16, marginBottom: 32 }}>
+      {/* Previous / Next Navigation Fixed at Bottom */}
+      <View 
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          backgroundColor: colors.surface,
+          borderTopWidth: 1,
+          borderTopColor: colors.border,
+          paddingHorizontal: 16,
+          paddingTop: 12,
+          paddingBottom: Platform.OS === 'ios' ? 28 : 16, // Respect bottom notches
+        }}
+      >
         <TouchableOpacity 
-          disabled={verseNum === 1}
-          onPress={() => navigateTo('VerseDetails', { chapterNumber: chapterNum, verseNumber: verseNum - 1 })}
-          style={{ flexDirection: 'row', alignItems: 'center', opacity: verseNum === 1 ? 0.3 : 1 }}
+          disabled={currentVerseNum === 1}
+          onPress={handlePrev}
+          style={{ 
+            flexDirection: 'row', 
+            alignItems: 'center', 
+            opacity: currentVerseNum === 1 ? 0.35 : 1,
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+            minWidth: 120,
+            justifyContent: 'center',
+            borderRadius: 10,
+            backgroundColor: currentVerseNum === 1 ? colors.muted : colors.accent,
+            minHeight: 48,
+          }}
         >
-          <ArrowLeft size={14} color={colors.accent} style={{ marginRight: 4 }} />
-          <Text style={{ color: colors.accent, fontSize: 13, fontWeight: 'bold' }}>Prev Verse</Text>
+          <ArrowLeft size={16} color={currentVerseNum === 1 ? colors.textSecondary : '#FFFFFF'} style={{ marginRight: 6 }} />
+          <Text style={{ color: currentVerseNum === 1 ? colors.textSecondary : '#FFFFFF', fontWeight: 'bold', fontSize: 14 }}>Prev Verse</Text>
         </TouchableOpacity>
 
+        <Text style={{ color: colors.text, fontWeight: 'bold', fontSize: 14 }}>
+          Verse {currentVerseNum}
+        </Text>
+
         <TouchableOpacity 
-          disabled={verseNum === totalVerses}
-          onPress={() => navigateTo('VerseDetails', { chapterNumber: chapterNum, verseNumber: verseNum + 1 })}
-          style={{ flexDirection: 'row', alignItems: 'center', opacity: verseNum === totalVerses ? 0.3 : 1 }}
+          disabled={currentVerseNum === totalVerses}
+          onPress={handleNext}
+          style={{ 
+            flexDirection: 'row', 
+            alignItems: 'center', 
+            opacity: currentVerseNum === totalVerses ? 0.35 : 1,
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+            minWidth: 120,
+            justifyContent: 'center',
+            borderRadius: 10,
+            backgroundColor: currentVerseNum === totalVerses ? colors.muted : colors.accent,
+            minHeight: 48,
+          }}
         >
-          <Text style={{ color: colors.accent, fontSize: 13, fontWeight: 'bold' }}>Next Verse</Text>
-          <ArrowRight size={14} color={colors.accent} style={{ marginLeft: 4 }} />
+          <Text style={{ color: currentVerseNum === totalVerses ? colors.textSecondary : '#FFFFFF', fontWeight: 'bold', fontSize: 14 }}>Next Verse</Text>
+          <ArrowRight size={16} color={currentVerseNum === totalVerses ? colors.textSecondary : '#FFFFFF'} style={{ marginLeft: 6 }} />
         </TouchableOpacity>
       </View>
-    </ScrollView>
+    </View>
   );
 }
